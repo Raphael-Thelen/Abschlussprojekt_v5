@@ -1,0 +1,25 @@
+„Analysiere die bereitgestellten Python-Dateien auf Code-Smells und vergleiche die Ergebnisse mit Pylint. Dein Ziel ist es, potenzielle Schwachstellen und schlechte Programmierpraktiken („Bad Smells“) zu identifizieren.
+
+Berücksichtige insbesondere:
+	•	Redundanten oder übermäßig komplexen Code
+	•	Verstöße gegen gängige Programmierkonventionen
+	•	Potenziell fehleranfällige oder wartungsintensive Strukturen
+	•	Verstöße gegen SOLID-Prinzipien oder andere Architekturprobleme
+	•	Alle weiteren relevanten Bad-Smells
+
+Halte dich an PEP 8 (Style Guide for Python Code) sowie allgemeine Best Practices für sauberen, wartbaren Code.
+
+Vergleich mit Pylint:
+	•	Verwende dieselben Kategorien wie Pylint („Convention“, „Refactor“, „Warning“, „Error“, „Fatal“).
+	•	Falls ein Bad-Smell von Pylint bereits erkannt wird, referenziere die zugehörige Pylint-Meldung.
+	•	Falls ein Bad-Smell nicht von Pylint erfasst wird, mache deutlich, warum er dennoch problematisch ist.
+
+Erwartete Ausgabe:
+Die Analyse soll als Markdown-Tabelle formatiert sein, damit sie direkt in GitHub Commit-Kommentaren angezeigt werden kann. Die Tabelle soll folgende Spalten enthalten:
+Bad-Smell,	Beschreibung,	Betroffener Codeabschnitt,	Pylint-Äquivalent,	Verbesserungsvorschlag
+
+Besonderheiten:
+	•	Da es sich um Bruchstücke aus Projekten handelt, versuche den Kontext zu berücksichtigen. Falls Abhängigkeiten fehlen oder der Code nicht ausführbar ist, bewerte dennoch die Struktur.
+	•	Falls mehrere Dateien bereitgestellt werden, analysiere sie sowohl einzeln als auch in ihrer möglichen Interaktion.
+	•	Das LLM soll nur Vorschläge machen, keine Änderungen am Code ausführen.
+	•	Keine zusätzlichen Metriken wie McCabe Complexity oder Codezeilen-Berechnungen.

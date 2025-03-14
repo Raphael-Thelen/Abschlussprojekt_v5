@@ -1,0 +1,97 @@
+name: Code Review with LLMs
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+jobs:
+  analyze_code:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pylint openai google-generativeai
+
+      - name: Get Changed Files
+        id: changed_files
+        run: |
+          BASE_REF=$(git rev-parse HEAD~1 || echo "")
+          if [ -z "$BASE_REF" ]; then
+            echo "No previous commit found, skipping file change detection."
+            echo "FILES=" >> $GITHUB_ENV
+          else
+            CHANGED_FILES=$(git diff --name-only --diff-filter=d $BASE_REF HEAD -- '*.py' | tr '\n' ' ')
+            echo "FILES=$CHANGED_FILES" >> $GITHUB_ENV
+          fi
+          echo "Changed Python files: ${CHANGED_FILES}"
+
+      - name: Run Pylint on Changed Files
+        run: |
+          if [ -n "$FILES" ]; then
+            echo "Running Pylint on: $FILES"
+            pylint $FILES > pylint_report.txt || true
+          else
+            echo "No Python files changed." > pylint_report.txt
+            echo "Skipping Pylint."
+          fi
+
+      - name: Run LLM Code Review
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          if [ -n "$FILES" ]; then
+            echo "Running LLM review on: $FILES"
+            python scripts/run_llm_review.py $FILES
+          else
+            echo "No Python files changed." > llm_review_gemini.txt
+            echo "Skipping LLM review."
+          fi
+
+      - name: Post Review Comments to Commit
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const { owner, repo } = context.repo;
+            const commit_sha = context.sha;
+
+            if (!commit_sha) {
+              console.log("No commit SHA found. Skipping commit comments.");
+              return;
+            }
+
+            const changedFiles = process.env.FILES || "No Python files changed.";
+
+            if (changedFiles === "No Python files changed." || changedFiles.trim() === "") {
+              console.log("No Python files changed, skipping commit comments.");
+              return;
+            }
+
+            function postComment(filename, title) {
+              if (fs.existsSync(filename) && fs.statSync(filename).size > 0) {
+                const report = fs.readFileSync(filename, 'utf8');
+                github.rest.repos.createCommitComment({
+                  owner,
+                  repo,
+                  commit_sha: commit_sha,
+                  body: `## ${title}\n${report}`
+                });
+              }
+            }
+
+            postComment('pylint_report.txt', 'Pylint Code Analysis');
+            postComment('llm_review_gemini.txt', 'Gemini Code Review');

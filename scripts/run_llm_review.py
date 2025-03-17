@@ -7,7 +7,7 @@ import time
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # Set Prompt for the model
-LLM_PROMPT_FILE = "prompt2.txt"
+LLM_PROMPT_FILE = "prompt3.txt"
 
 # Ensure API keys are available
 if not GEMINI_API_KEY:
@@ -34,7 +34,7 @@ def review_with_gemini(code):
     prompt = read_prompt()
     response = model.generate_content(f"{prompt}\n\n{code}")
 
-    time.sleep(2)  # Wartezeit zwischen Anfragen
+    time.sleep(20)  # Wartezeit zwischen Anfragen
     return response.text
 
 def main():

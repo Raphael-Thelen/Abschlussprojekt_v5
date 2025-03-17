@@ -7,7 +7,7 @@ import time
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # Set Prompt for the model
-LLM_PROMPT_FILE = "prompt1.txt"
+LLM_PROMPT_FILE = "prompt2.txt"
 
 # Ensure API keys are available
 if not GEMINI_API_KEY:
